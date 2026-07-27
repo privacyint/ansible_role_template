@@ -1,0 +1,6 @@
+# Python requirements for development and testing
+ansible>=12.0
+ansible-lint>=25.0
+molecule>=25.0
+molecule-plugins[docker]>=25.0
+docker>=7.0
