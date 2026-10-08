@@ -11,6 +11,12 @@ galaxy_info:
   platforms:
     - name: Alpine
       versions:
-        - all
+        - "all"
+    - name: Debian
+      versions:
+        - "trixie"
   galaxy_tags:
     - 
+
+# Dependencies run before the role is executed
+dependencies: []

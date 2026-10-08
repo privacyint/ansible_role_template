@@ -1,13 +1,5 @@
-# Ansible runtime files
-.ansible/
 # Ansible
 *.retry
-*.log
-
-# Molecule
-.molecule/
-.cache/
-molecule/*/\#*
 
 # Python
 __pycache__/
@@ -15,18 +7,9 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 venv/
 ENV/
-*.egg-info/
-dist/
-build/
-
-# Molecule
-.molecule/
-.cache/
-
-# IDE
+env/
 build/
 develop-eggs/
 dist/
@@ -45,6 +28,19 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+*.cover
+*.log
+
+# Molecule
+.molecule/
+.cache/
 
 # Virtual environments
 venv/
@@ -58,25 +54,25 @@ env/
 *.swp
 *.swo
 *~
-
-# OS
-.DS_Store
 .DS_Store
 
 # Testing
 .pytest_cache/
 .tox/
-.coverage
-.coverage.*
 htmlcov/
-.mypy_cache/
-.dmypy.json
-dmypy.json
+.coverage
+coverage.xml
+*.cover
 
 # Temporary files
 *.tmp
 *.bak
 *.orig
+tmp/
+temp/
 
 # OS
 Thumbs.db
+.Spotlight-V100
+.Trashes
+.ansible

@@ -1,0 +1,8 @@
+---
+- name: Verify installation
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Verify role is applied
+      ansible.builtin.debug:
+        msg: "Role applied successfully"

@@ -1,9 +1,0 @@
----
-# Converge playbook for Molecule testing
-- name: Converge
-  hosts: all
-  become: true
-  gather_facts: true
-
-  roles:
-    - role: ansible_role_
