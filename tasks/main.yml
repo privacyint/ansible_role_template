@@ -1,8 +1,2 @@
 ---
 # tasks file for ansible role
-- name: Ensure all required variables have been set
-  ansible.builtin.include_role:
-    name: variable_validation
-  vars:
-    required_variables:  # noqa var-naming[no-role-prefix]
-      - 
