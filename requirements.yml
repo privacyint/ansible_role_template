@@ -1,3 +1,5 @@
 ---
 # Ansible Galaxy requirements for role dependencies
-roles:
+roles: []
+
+collections: []

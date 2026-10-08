@@ -6,10 +6,15 @@ on:
     branches:
       - main
       - master
+      - develop
   pull_request:
     branches:
       - main
       - master
+      - develop
+
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -24,15 +29,13 @@ jobs:
         with:
           python-version: '3.13'
           cache: 'pip'
-          cache-dependency-path: requirements.txt
+          cache-dependency-path: requirements-dev.txt
 
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install ansible-lint ansible
+      - name: Configure development environment
+        run: make configure
 
-      - name: Run ansible-lint
-        run: ansible-lint
+      - name: Run lint checks
+        run: make lint
 
   molecule:
     name: Molecule - ${{ matrix.label }}
@@ -41,8 +44,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - scenario: default
-            label: default scenario
+          - scenario: alpine
+            label: Alpine scenario
+          - scenario: debian
+            label: Debian scenario
     steps:
       - name: Check out the codebase
         uses: actions/checkout@v4
@@ -52,12 +57,10 @@ jobs:
         with:
           python-version: '3.13'
           cache: 'pip'
-          cache-dependency-path: requirements.txt
+          cache-dependency-path: requirements-dev.txt
 
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install -r requirements.txt
+      - name: Configure development environment
+        run: make configure
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
@@ -68,7 +71,7 @@ jobs:
           echo "Description: ${{ matrix.label }}"
 
       - name: Run Molecule test
-        run: molecule test --scenario-name ${{ matrix.scenario }}
+        run: make test-scenario SCENARIO=${{ matrix.scenario }}
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
