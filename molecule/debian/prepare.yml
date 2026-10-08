@@ -1,0 +1,12 @@
+---
+- name: Prepare Debian test environment
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Install Python3 and sudo
+      ansible.builtin.raw: apt-get update && apt-get install -y python3 sudo
+      changed_when: false
+
+    - name: Gather facts
+      ansible.builtin.setup:

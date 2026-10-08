@@ -1,0 +1,58 @@
+---
+# Molecule configuration for Alpine (architecture follows the runner)
+prerun: true
+
+dependency:
+  name: galaxy
+  enabled: true
+  options:
+    role-file: molecule/shared/requirements.yml
+    requirements-file: molecule/shared/requirements.yml
+
+driver:
+  name: docker
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callbacks_enabled: ansible.posix.profile_tasks
+      stdout_callback: default
+  # Paths must be env vars: ansible-compat exports them, and env overrides ansible.cfg.
+  env:
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.venv/collections:${HOME}/.ansible/collections:/usr/share/ansible/collections
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.venv/collections:${HOME}/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+  playbooks:
+    prepare: prepare.yml
+    converge: ../shared/converge.yml
+    verify: ../shared/verify.yml
+  inventory:
+    links:
+      group_vars: ../group_vars/
+      host_vars: host_vars/
+
+platforms:
+  - name: alpine
+    image: alpine:3.24
+    pre_build_image: true
+    privileged: false
+    command: /bin/sh -c "tail -f /dev/null"
+    tmpfs:
+      - /run
+
+verifier:
+  name: ansible
+
+scenario:
+  name: alpine
+  test_sequence:
+    - dependency
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - verify
+    - cleanup
+    - destroy
