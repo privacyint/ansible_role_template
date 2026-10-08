@@ -1,36 +1,26 @@
 ---
-# ansible-lint configuration for role
-# See https://ansible.readthedocs.io/projects/lint/
-
 profile: production
 
-# Exclude paths from linting
 exclude_paths:
-- .git/
-  - .github/
-  - molecule/
-  - tests/
+  - .*/
+  - molecule/**/roles/
 
-# Enable checking of include/import tasks
-enable_list:
-  - yaml
+skip_list: []
 
-# Skip specific rules if needed
-skip_list:
-  - role-name[path]  # Allow role directory name without prefix
-  - galaxy[tags]     # Allow custom Galaxy tags
-  - fqcn[action-core]  # Allow ansible.builtin prefix to be omitted for common modules
-  - var-naming[no-role-prefix]  # Allow passing variables to included roles without prefix
-
-# Warn on deprecated features
 warn_list:
   - experimental
+  - no-handler
 
-# Offline mode - do not query Galaxy or automation-hub
-offline: true
+kinds:
+  - requirements: "requirements.yml"
+  - requirements: "**/molecule/*/requirements.yml"
+  - molecule: "**/molecule/*/molecule.yml"
+  - playbook: "*.yml"
+  - playbook: "*.yaml"
+  - playbook: "**/molecule/*/*.yml"
+  - tasks: "**/tasks/*.yml"
+  - vars: "**/vars/*.yml"
+  - meta: "**/meta/*.yml"
+  - yaml: ".ansible-lint"
 
-# Set Ansible version requirement
-supported_ansible_also:
-  - "2.17"
-  - "2.18"
-  - "2.19"
+offline: false
