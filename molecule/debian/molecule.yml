@@ -37,10 +37,11 @@ provisioner:
 
 platforms:
   - name: debian
-    image: debian:trixie
+    # Debian 13 with systemd support
+    image: geerlingguy/docker-debian13-ansible:latest
     pre_build_image: true
     privileged: false
-    command: /bin/bash -c "tail -f /dev/null"
+    command: /lib/systemd/systemd
 
 verifier:
   name: ansible
