@@ -39,10 +39,14 @@ platforms:
   - name: alpine
     image: alpine:3.24
     pre_build_image: true
-    privileged: false
     command: /bin/sh -c "tail -f /dev/null"
     tmpfs:
       - /run
+    # Uncomment the following lines to enable privileged mode and cgroup namespace support when the role is using nested containers
+    # privileged: true
+    # cgroupns_mode: host
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:rw
 
 verifier:
   name: ansible
