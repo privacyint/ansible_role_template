@@ -8,6 +8,9 @@ dependency:
   options:
     role-file: molecule/shared/requirements.yml
     requirements-file: molecule/shared/requirements.yml
+  env:
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/collections
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/roles
 
 driver:
   name: docker
@@ -20,8 +23,9 @@ provisioner:
       stdout_callback: default
   # Paths must be env vars: ansible-compat exports them, and env overrides ansible.cfg.
   env:
-    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.venv/collections:${HOME}/.ansible/collections:/usr/share/ansible/collections
-    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.venv/collections:${HOME}/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/collections
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/roles
+
   playbooks:
     prepare: prepare.yml
     converge: ../shared/converge.yml
