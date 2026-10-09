@@ -44,7 +44,6 @@ verifier:
 scenario:
   name: debian
   test_sequence:
-    - dependency
     - destroy
     - syntax
     - create

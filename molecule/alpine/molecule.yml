@@ -46,7 +46,6 @@ verifier:
 scenario:
   name: alpine
   test_sequence:
-    - dependency
     - destroy
     - syntax
     - create
