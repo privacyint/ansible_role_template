@@ -39,7 +39,7 @@ platforms:
   - name: alpine
     image: alpine:3.24
     pre_build_image: true
-    command: /bin/sh -c "tail -f /dev/null"
+    command: /sbin/init
     tmpfs:
       - /run
     # Uncomment the following lines to enable privileged mode and cgroup namespace support when the role is using nested containers
