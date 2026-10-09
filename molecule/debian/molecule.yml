@@ -42,6 +42,8 @@ platforms:
     pre_build_image: true
     privileged: false
     command: /lib/systemd/systemd
+    tmpfs:
+      - /run
 
 verifier:
   name: ansible
