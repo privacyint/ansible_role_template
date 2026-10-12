@@ -4,7 +4,7 @@ prerun: true
 
 dependency:
   name: galaxy
-  enabled: false
+  enabled: true
   options:
     role-file: molecule/shared/requirements.yml
     requirements-file: molecule/shared/requirements.yml
