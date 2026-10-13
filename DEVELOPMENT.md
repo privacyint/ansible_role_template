@@ -1,6 +1,13 @@
 # Development Guide
 
-This repository is a starter template for building an Ansible role. The role implementation is intentionally empty: `tasks/main.yml` and `handlers/main.yml` are placeholders, and the Molecule verifier currently checks only that the role can be included. Adapt the role metadata, defaults, tasks, and verification to your use case before relying on it to manage a system.
+This repository is a starter template for building an Ansible role.
+
+The role implementation is intentionally empty: `tasks/main.yml` and `handlers/main.yml` are placeholders, and the
+Molecule verifier currently checks only that the role can be included.
+
+Adapt the role metadata, defaults, tasks, and verification to your use case before relying on it to manage a system.
+You may want to also update this file to at least reference your new role, as it describes how our `Makefile` works
+and will be useful for future developers on your role.
 
 ## Prerequisites
 
@@ -25,7 +32,11 @@ From the repository root, run:
 make configure
 ```
 
-This creates `.venv` with Python 3.13, installs the development dependencies from `requirements-dev.txt`, installs role dependencies from `requirements.yml`, and resolves Molecule dependencies for all scenarios. Roles are installed in `.ansible/roles` and collections in `.ansible/collections`; the Makefile exports these paths for Ansible and Molecule commands. It invokes development tools from `.venv/bin`, so activating the virtual environment is not required when using its targets.
+This creates `.venv` with Python 3.13, installs the development dependencies from `requirements-dev.txt`, installs
+role dependencies from `requirements.yml`, and resolves Molecule dependencies for all scenarios. Roles are installed
+in `.ansible/roles` and collections in `.ansible/collections`; the Makefile exports these paths for Ansible and
+Molecule commands. It invokes development tools from `.venv/bin`, so activating the virtual environment is not
+required when using its targets.
 
 To install only the Python development tools, use:
 
@@ -37,6 +48,11 @@ To install role dependencies explicitly, use:
 
 ```bash
 make requirements
+```
+
+To force reinstall dependencies (e.g. you have changed a version of a SHA pinned role, you can run:
+
+```bash
 make force-requirements
 ```
 
@@ -70,7 +86,12 @@ Run every Molecule scenario:
 make test
 ```
 
-The current scenarios use Alpine 3.24 and Debian Trixie Docker images. Make discovers scenario names from `molecule/*/molecule.yml`; `SCENARIO` defaults to the first discovered name (currently `alpine`). Set it explicitly to run another scenario or to work through individual Molecule stages:
+The template scenarios use Alpine 3.24 and Debian Trixie Docker images, with a real init.
+
+Make discovers scenario names from `molecule/*/molecule.yml`.
+
+If unsupplied, `SCENARIO` defaults to the first discovered name (currently `alpine`). Set it explicitly to run another
+scenario or to work through individual Molecule stages:
 
 ```bash
 make test-scenario SCENARIO=debian
@@ -80,19 +101,30 @@ make molecule-verify SCENARIO=alpine
 make molecule-destroy SCENARIO=alpine
 ```
 
-The `molecule-*` targets operate on the selected `SCENARIO`; use `make molecule-dependency` to resolve dependencies for all scenarios before running Molecule steps.
+The `molecule-*` targets operate on the selected `SCENARIO`; use `make molecule-dependency` to resolve dependencies for
+all scenarios before running Molecule steps.
 
-The current shared verifier reports that the role was applied; it does not assert role-specific system state. Add meaningful checks to `molecule/shared/verify.yml` as you implement your role. Keep tasks idempotent and test that behaviour with the full Molecule run.
+The current shared verifier reports that the role was applied; it does not assert role-specific system state. Add meaningful
+behavioural checks to `molecule/shared/verify.yml` as you implement your role, it is uninteresting that .
+
+Keep tasks idempotent and test that behaviour with the full Molecule run.
 
 ## Template Setup
 
-Before building on this template, review and replace the starter metadata in `meta/main.yml`, including the role name, author, description, licence, minimum Ansible version, supported platforms, and tags. Implement the role in `tasks/`, add defaults and handlers as required, and update the Molecule converge and verify playbooks for the behaviour you add.
+Before building on this template, review and replace the starter metadata in `meta/main.yml`, including the role name, author,
+description, licence, minimum Ansible version, supported platforms, and tags.
 
-`requirements.yml` is for role or collection dependencies needed by consumers. `molecule/shared/requirements.yml` contains collections used by the test scenarios. Python development tools are listed separately in `requirements-dev.txt`.
+Implement the role in `tasks/`, add defaults and handlers as required, and update the Molecule converge and verify playbooks
+for the behaviour you add.
+
+`requirements.yml` is for role or collection dependencies needed by consumers. `molecule/shared/requirements.yml` contains
+collections used by the test scenarios. Python development tools are listed separately in `requirements-dev.txt`.
 
 ## CI
 
-GitHub Actions runs `make lint` and runs the Molecule scenarios separately for Alpine and Debian. The workflow is configured for pushes and pull requests targeting `main`, `master`, or `develop`; see `.github/workflows/ci.yml` for the exact triggers and jobs.
+GitHub Actions runs `make lint` and runs the Molecule scenarios separately for Alpine and Debian. The workflow is configured
+for pushes and pull requests targeting `main`, `master`, or `develop`; see `.github/workflows/ci.yml` for the exact triggers
+and jobs.
 
 ## Troubleshooting
 
@@ -102,7 +134,8 @@ If a collection is missing, resolve test dependencies with:
 make molecule-dependency
 ```
 
-If Docker commands fail, check that Docker Engine is running and that your user can access its socket. To remove Molecule instances and generated test artefacts, run:
+If Docker commands fail, check that Docker Engine is running and that your user can access its socket. To remove Molecule
+instances and generated test artefacts, run:
 
 ```bash
 make clean
@@ -131,4 +164,5 @@ make molecule-destroy SCENARIO=alpine
 make clean
 ```
 
-Use `SCENARIO=<name>` with scenario-specific targets. Run `make help` to see the discovered scenario names and which one is the current default.
+Use `SCENARIO=<name>` with scenario-specific targets. Run `make help` to see the discovered scenario names and which one
+is the current default.
