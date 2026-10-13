@@ -51,7 +51,7 @@ To install role dependencies explicitly, use:
 make requirements
 ```
 
-To force reinstall dependencies (e.g. you have changed a version of a SHA pinned role, you can run:
+To force reinstall dependencies (e.g. you have changed a version of a SHA pinned role), you can run:
 
 ```bash
 make force-requirements
