@@ -6,7 +6,6 @@ dependency:
   name: galaxy
   enabled: true
   options:
-    no-cache: true
     role-file: molecule/shared/requirements.yml
     requirements-file: molecule/shared/requirements.yml
   env:
