@@ -76,6 +76,7 @@ molecule-create:
 
 molecule-dependency:
 	@echo "Resolving Molecule test requirements for all scenarios..."
+	$(VENV_PATH)/bin/ansible-galaxy collection install --no-cache -r molecule/shared/requirements.yml -p $(ANSIBLE_PATH)/collections
 	$(VENV_PATH)/bin/molecule dependency --all
 
 molecule-converge:
