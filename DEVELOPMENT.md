@@ -128,10 +128,13 @@ collections used by the test scenarios. Python development tools are listed sepa
 
 The repository uses GitHub Actions for the main development checks and for routine dependency maintenance.
 
-- `.github/workflows/ci.yml` runs the local validation flow (`make lint`) and the Molecule scenarios for Alpine and Debian.
-- `.github/workflows/security-and-dependencies.yml` performs dependency and security checks.
+- `.github/workflows/ci.yml` runs the base Ansible checks (`make ansible-lint` and `make yamllint`) and the Molecule scenarios.
 - `.github/workflows/docs.yml` runs the Markdown linting checks for repository documentation.
+- `.github/workflows/security-and-dependencies.yml` performs dependency and security checks.
 - `.github/workflows/release.yml` handles release publication for tagged builds.
+
+The local `make lint` target combines `ansible-lint`, `yamllint`, and `markdownlint`, but the CI workflows split that work
+across separate jobs so the Markdown checks are not part of the core Molecule validation job.
 
 The scheduled dependency bump workflows are documented in the next section because they are intentionally operational and
 review-oriented rather than part of the normal validation path.
