@@ -2,9 +2,6 @@
 name: Security and dependency checks
 description: Perform security audit of python dependencies and check Ansible dependency resolution on the project using GitHub Actions
 
-x-checkout: &checkout actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-x-python3: &python3 actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
-
 on:
   pull_request:
     branches:
@@ -20,6 +17,9 @@ on:
   schedule:
     - cron: '0 3 * * 1'
   workflow_dispatch:
+
+x-checkout: &checkout actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+x-python3: &python3 actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

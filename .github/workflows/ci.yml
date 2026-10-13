@@ -1,10 +1,6 @@
 ---
 name: CI - Lint and Molecule
 
-x-checkout: &checkout actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-x-docker: &docker docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
-x-python3: &python3 actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
-
 on:
   push:
     branches:
@@ -17,6 +13,10 @@ on:
       - master
       - develop
   workflow_dispatch:
+
+x-checkout: &checkout actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+x-docker: &docker docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+x-python3: &python3 actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
