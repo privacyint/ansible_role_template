@@ -27,7 +27,7 @@ help:
 	@echo "  molecule-converge     Apply role to test instances"
 	@echo "  molecule-verify       Run verification tests"
 	@echo "  molecule-destroy      Destroy Molecule test instances"
-	@echo "  SCENARIO              Scenario for molecule-* targets (available: $(SCENARIOS))"
+	@echo "  SCENARIO              Scenario for molecule-* targets. Defaults to $(SCENARIO). (available: $(SCENARIOS))"
 	@echo "  clean                 Clean up test artifacts"
 
 configure:
