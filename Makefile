@@ -2,6 +2,7 @@
 SCENARIOS := $(patsubst molecule/%/molecule.yml,%,$(wildcard molecule/*/molecule.yml))
 SCENARIO ?= $(firstword $(SCENARIOS))
 PYTHON := python3.13
+MARKDOWNLINT := 0.22.1
 VENV_PATH := $(CURDIR)/.venv
 ANSIBLE_PATH := $(CURDIR)/.ansible
 export PATH := $(VENV_PATH)/bin:$(PATH)
@@ -64,7 +65,7 @@ yamllint:
 markdownlint:
 	node -v || { echo "Node.js is not installed"; exit 1; }
 	@echo "Running markdownlint..."
-	find . \( -path './.venv' -o -path './.ansible' -o -path './.git' \) -prune -o -name '*.md' -exec npx --yes markdownlint-cli2 {} +
+	find . \( -path './.venv' -o -path './.ansible' -o -path './.git' \) -prune -o -name '*.md' -exec npx --yes markdownlint-cli2@$(MARKDOWNLINT) {} +
 
 lint: ansible-lint yamllint markdownlint
 
