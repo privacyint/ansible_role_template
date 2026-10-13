@@ -39,6 +39,8 @@ jobs:
       - name: Detect changed action pins
         id: detect
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 - <<'PY'
           import json
@@ -57,15 +59,25 @@ jobs:
           ]
 
           def fetch_latest_tag(repo: str):
+              token = os.environ.get('GITHUB_TOKEN')
+              headers = {
+                  'Accept': 'application/vnd.github+json',
+                  'User-Agent': 'repo-bump-action-pins',
+              }
+              if token:
+                  headers['Authorization'] = f'Bearer {token}'
+
+              failures = []
               for url in [
                   f'https://api.github.com/repos/{repo}/releases/latest',
                   f'https://api.github.com/repos/{repo}/tags?per_page=1',
               ]:
-                  req = request.Request(url, headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'repo-bump-action-pins'})
+                  req = request.Request(url, headers=headers)
                   try:
                       with request.urlopen(req, timeout=30) as resp:
                           payload = json.load(resp)
-                  except Exception:
+                  except Exception as exc:
+                      failures.append(f'{url}: {exc}')
                       continue
                   if isinstance(payload, list):
                       if payload:
@@ -74,6 +86,9 @@ jobs:
                       tag = payload.get('tag_name')
                       if tag:
                           return tag
+
+              if failures:
+                  raise RuntimeError(f'Failed to resolve latest tag for {repo} from both GitHub API endpoints: {failures}')
               return None
 
           def resolve_tag_sha(repo: str, tag: str):
