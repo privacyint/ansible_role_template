@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  author: 
-  description: 
+  author: Privacy International
+  description: An Ansible role
   company: Privacy International
   license: \#YOLO Public License (YPL) v0.12.34-hunter.2
-  role_name: 
+  role_name: ansible_role_
   namespace: privacyint
 
   min_ansible_version: "2.1"
@@ -16,7 +16,7 @@ galaxy_info:
       versions:
         - "trixie"
   galaxy_tags:
-    - 
+    - ansible
 
 # Dependencies run before the role is executed
 dependencies: []
