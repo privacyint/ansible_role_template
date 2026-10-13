@@ -61,7 +61,7 @@ jobs:
         run: make configure
 
       - name: Run yaml lint checks
-        run: make yaml-lint
+        run: make yamllint
 
   molecule:
     name: Molecule - ${{ matrix.label }}
