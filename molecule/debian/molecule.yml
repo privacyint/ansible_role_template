@@ -38,7 +38,8 @@ provisioner:
 platforms:
   - name: debian
     # Debian 13 with systemd support
-    image: geerlingguy/docker-debian13-ansible:latest
+    # `tag:latest` on 11th October 2026
+    image: geerlingguy/docker-debian13-ansible@sha256:979c0d5e12b0035fff1c46bd4dfd00d67cd82fa48035194f14f32e01c8c02372
     pre_build_image: true
     command: /lib/systemd/systemd
     tmpfs:
