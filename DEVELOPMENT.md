@@ -70,7 +70,7 @@ Run every Molecule scenario:
 make test
 ```
 
-The current scenarios use Alpine 3.24 and Debian Trixie Docker images. To run one scenario, or to work through individual Molecule stages, set `SCENARIO` (which defaults to `alpine`):
+The current scenarios use Alpine 3.24 and Debian Trixie Docker images. Make discovers scenario names from `molecule/*/molecule.yml`; `SCENARIO` defaults to the first discovered name (currently `alpine`). Set it explicitly to run another scenario or to work through individual Molecule stages:
 
 ```bash
 make test-scenario SCENARIO=debian
@@ -131,4 +131,4 @@ make molecule-destroy SCENARIO=alpine
 make clean
 ```
 
-Use `SCENARIO=<name>` with scenario-specific targets; the supported names are `alpine` and `debian`.
+Use `SCENARIO=<name>` with scenario-specific targets. Run `make help` to see the discovered scenario names and which one is the current default.
