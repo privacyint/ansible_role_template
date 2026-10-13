@@ -52,6 +52,7 @@ jobs:
 
           repos = [
               'actions/checkout',
+              'actions/setup-node',
               'actions/setup-python',
               'docker/setup-buildx-action',
               'softprops/action-gh-release',
