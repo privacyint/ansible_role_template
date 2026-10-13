@@ -92,7 +92,7 @@ The template scenarios use Alpine 3.24 and Debian Trixie Docker images, with a r
 
 Make discovers scenario names from `molecule/*/molecule.yml`.
 
-If unsupplied, `SCENARIO` defaults to the first discovered name (currently `alpine`). Set it explicitly to run another
+If unsupplied, `SCENARIO` defaults to the first globbed name (currently `alpine`). Set it explicitly to run another
 scenario or to work through individual Molecule stages:
 
 ```bash
@@ -107,7 +107,9 @@ The `molecule-*` targets operate on the selected `SCENARIO`; use `make molecule-
 all scenarios before running Molecule steps.
 
 The current shared verifier reports that the role was applied; it does not assert role-specific system state. Add meaningful
-behavioural checks to `molecule/shared/verify.yml` as you implement your role, it is uninteresting that .
+behavioural checks to `molecule/shared/verify.yml` as you implement your role; it is uninteresting that files match what
+we expect, but we want to know that, for instance a webserver is up and serving what we expect it to be rather than throwing
+an error.
 
 Keep tasks idempotent and test that behaviour with the full Molecule run.
 
