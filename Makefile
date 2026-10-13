@@ -1,6 +1,6 @@
 .PHONY: help configure install requirements force-requirements ansible-lint yamllint lint test test-scenario clean molecule-dependency molecule-create molecule-converge molecule-verify molecule-destroy
-SCENARIO ?= alpine
 SCENARIOS := $(patsubst molecule/%/molecule.yml,%,$(wildcard molecule/*/molecule.yml))
+SCENARIO ?= $(firstword $(SCENARIOS))
 PYTHON := python3.13
 VENV_PATH := $(CURDIR)/.venv
 ANSIBLE_PATH := $(CURDIR)/.ansible
