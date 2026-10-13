@@ -25,7 +25,7 @@ From the repository root, run:
 make configure
 ```
 
-This creates `.venv` with Python 3.13, installs the development dependencies from `requirements-dev.txt`, installs role dependencies from `requirements.yml`, and resolves Molecule dependencies for all scenarios. The Makefile invokes tools from `.venv/bin`, so activating the virtual environment is not required when using its targets.
+This creates `.venv` with Python 3.13, installs the development dependencies from `requirements-dev.txt`, installs role dependencies from `requirements.yml`, and resolves Molecule dependencies for all scenarios. Roles are installed in `.ansible/roles` and collections in `.ansible/collections`; the Makefile exports these paths for Ansible and Molecule commands. It invokes development tools from `.venv/bin`, so activating the virtual environment is not required when using its targets.
 
 To install only the Python development tools, use:
 
