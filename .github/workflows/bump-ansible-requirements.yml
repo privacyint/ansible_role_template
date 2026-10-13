@@ -62,6 +62,9 @@ jobs:
                   return None
               return match.group('owner'), match.group('repo')
 
+          def strip_inline_comment(value: str):
+              return re.sub(r'\s*#.*$', '', value).strip().strip("\"'")
+
           def github_latest_tag(owner: str, repo: str):
               token = os.environ.get('GITHUB_TOKEN')
               headers = {
@@ -141,7 +144,7 @@ jobs:
                           if tag:
                               sha = git_tag_sha(f'https://github.com/{owner}/{repo_name}.git', tag)
                               if sha:
-                                  current = version_match.group(1).strip().strip('"\'')
+                                  current = strip_inline_comment(version_match.group(1))
                                   if current != sha:
                                       changes.append({
                                           'name': name,
