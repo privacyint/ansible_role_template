@@ -1,4 +1,4 @@
-.PHONY: help configure install requirements force-requirements ansible-lint yamllint lint test test-scenario clean molecule-dependency molecule-create molecule-converge molecule-verify molecule-destroy
+.PHONY: help configure install requirements force-requirements ansible-lint yamllint markdownlint lint test test-scenario clean molecule-dependency molecule-create molecule-converge molecule-verify molecule-destroy
 SCENARIOS := $(patsubst molecule/%/molecule.yml,%,$(wildcard molecule/*/molecule.yml))
 SCENARIO ?= $(firstword $(SCENARIOS))
 PYTHON := python3.13
@@ -19,7 +19,8 @@ help:
 	@echo "  force-requirements    Force install role dependencies from requirements.yml (ignoring any cached versions)"
 	@echo "  ansible-lint          Run ansible-lint"
 	@echo "  yamllint              Run yamllint"
-	@echo "  lint                  Run ansible-lint and yamllint"
+	@echo "  markdownlint          Run markdownlint on Markdown files"
+	@echo "  lint                  Run ansible-lint, yamllint and markdownlint"
 	@echo "  test                  Run full Molecule test suite"
 	@echo '  test-scenario         Run one Molecule scenario (set `SCENARIO=<scenario>`)'
 	@echo "  molecule-dependency   Resolve dependencies for all scenarios"
@@ -60,7 +61,12 @@ yamllint:
 	@echo "Running yamllint..."
 	$(VENV_PATH)/bin/yamllint .
 
-lint: ansible-lint yamllint
+markdownlint:
+	node -v || { echo "Node.js is not installed"; exit 1; }
+	@echo "Running markdownlint..."
+	find . \( -path './.venv' -o -path './.ansible' -o -path './.git' \) -prune -o -name '*.md' -exec npx --yes markdownlint-cli2 {} +
+
+lint: ansible-lint yamllint markdownlint
 
 test:
 	@echo "Running all Molecule scenarios..."

@@ -44,4 +44,4 @@ jobs:
           node-version: '20'
 
       - name: Run markdown lint checks
-        run: npx --yes markdownlint-cli2 "**/*.md"
+        run: make markdownlint

@@ -14,6 +14,7 @@ and will be useful for future developers on your role.
 - Python 3.13
 - Docker Engine available to the current user, with the daemon running
 - GNU Make
+- NodeJS 20 (if and only if you want to run `make markdownlint`)
 
 Check that the required tools are available:
 
@@ -58,16 +59,17 @@ make force-requirements
 
 ## Lint
 
-Run both configured linters:
+Run all three configured linters:
 
 ```bash
 make lint
 ```
 
-To run either directly:
+To run them directly:
 
 ```bash
 make ansible-lint
+make markdownlint
 make yamllint
 ```
 
@@ -153,6 +155,7 @@ make requirements
 make force-requirements
 make ansible-lint
 make yamllint
+make markdownlint
 make lint
 make test
 make test-scenario SCENARIO=alpine
