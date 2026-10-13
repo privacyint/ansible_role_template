@@ -1,6 +1,9 @@
 ---
 name: Documentation checks
 
+x-checkout: &checkout actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+x-node: &node actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.0.1
+
 on:
   push:
     branches:
@@ -34,8 +37,13 @@ jobs:
     name: Markdown lint
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/checkout-codebase
-      - uses: ./.github/actions/setup-node-20
+      - name: Check out the codebase
+        uses: *checkout
+
+      - name: Set up Node.js 20 environment
+        uses: *node
+        with:
+            node-version: '20'
 
       - name: Run markdown lint checks
         run: npx --yes markdownlint-cli2 "**/*.md"

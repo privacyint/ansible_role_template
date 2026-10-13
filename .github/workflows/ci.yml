@@ -1,6 +1,10 @@
 ---
 name: CI - Lint and Molecule
 
+x-checkout: &checkout actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+x-docker: &docker docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+x-python3: &python3 actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+
 on:
   push:
     branches:
@@ -26,8 +30,15 @@ jobs:
     name: Ansible Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/checkout-codebase
-      - uses: ./.github/actions/setup-python-3
+      - name: Check out the codebase
+        uses: *checkout
+
+      - name: Set up Python 3
+        uses: *python3
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: requirements-dev.txt
 
       - name: Configure development environment
         run: make configure
@@ -39,8 +50,15 @@ jobs:
     name: YAML Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/checkout-codebase
-      - uses: ./.github/actions/setup-python-3
+      - name: Check out the codebase
+        uses: *checkout
+
+      - name: Set up Python 3
+        uses: *python3
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: requirements-dev.txt
 
       - name: Configure development environment
         run: make configure
@@ -60,14 +78,21 @@ jobs:
           - scenario: debian
             label: Debian scenario
     steps:
-      - uses: ./.github/actions/checkout-codebase
-      - uses: ./.github/actions/setup-python-3
+      - name: Check out the codebase
+        uses: *checkout
+
+      - name: Set up Python 3
+        uses: *python3
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: requirements-dev.txt
 
       - name: Configure development environment
         run: make configure
 
       - name: Set up Docker
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+        uses: *docker
 
       - name: Summarise test target
         run: |
