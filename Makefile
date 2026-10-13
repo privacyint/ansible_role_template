@@ -1,5 +1,6 @@
 .PHONY: help configure install requirements force-requirements ansible-lint yamllint lint test test-scenario clean molecule-dependency molecule-create molecule-converge molecule-verify molecule-destroy
 SCENARIO ?= alpine
+SCENARIOS := $(patsubst molecule/%/molecule.yml,%,$(wildcard molecule/*/molecule.yml))
 PYTHON := python3.13
 VENV_PATH := $(CURDIR)/.venv
 ANSIBLE_PATH := $(CURDIR)/.ansible
@@ -26,7 +27,7 @@ help:
 	@echo "  molecule-converge     Apply role to test instances"
 	@echo "  molecule-verify       Run verification tests"
 	@echo "  molecule-destroy      Destroy Molecule test instances"
-	@echo "  SCENARIO              Scenario for molecule-* targets"
+	@echo "  SCENARIO              Scenario for molecule-* targets (available: $(SCENARIOS))"
 	@echo "  clean                 Clean up test artifacts"
 
 configure:
