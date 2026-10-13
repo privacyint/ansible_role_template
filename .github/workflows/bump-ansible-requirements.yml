@@ -243,5 +243,3 @@ jobs:
             - commit: [`${{ matrix.item.sha }}`](https://github.com/${{ matrix.item.repo }}/commit/${{ matrix.item.sha }})
 
             Review the version bump before merging to confirm it matches the release you intend to consume.
-          labels: |
-            maintenance

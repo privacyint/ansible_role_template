@@ -194,5 +194,3 @@ jobs:
             - commit: [`${{ matrix.item.sha }}`](https://github.com/${{ matrix.item.name }}/commit/${{ matrix.item.sha }})
 
             Review the action bump before merging to confirm it matches the release you want to consume.
-          labels: |
-            maintenance
