@@ -14,7 +14,7 @@ and will be useful for future developers on your role.
 - Python 3.13
 - Docker Engine available to the current user, with the daemon running
 - GNU Make
-- NodeJS 20 (if and only if you want to run `make markdownlint`)
+- NodeJS 20 (if and only if you want to run `make markdownlint`, including via the `make lint` target)
 
 Check that the required tools are available:
 
