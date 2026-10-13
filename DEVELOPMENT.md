@@ -126,9 +126,15 @@ collections used by the test scenarios. Python development tools are listed sepa
 
 ## CI
 
-GitHub Actions runs `make lint` and runs the Molecule scenarios separately for Alpine and Debian. The workflow is configured
-for pushes and pull requests targeting `main`, `master`, or `develop`; see `.github/workflows/ci.yml` for the exact triggers
-and jobs.
+The repository uses GitHub Actions for the main development checks and for routine dependency maintenance.
+
+- `.github/workflows/ci.yml` runs the local validation flow (`make lint`) and the Molecule scenarios for Alpine and Debian.
+- `.github/workflows/security-and-dependencies.yml` performs dependency and security checks.
+- `.github/workflows/docs.yml` runs the Markdown linting checks for repository documentation.
+- `.github/workflows/release.yml` handles release publication for tagged builds.
+
+The scheduled dependency bump workflows are documented in the next section because they are intentionally operational and
+review-oriented rather than part of the normal validation path.
 
 ## Troubleshooting
 
@@ -171,3 +177,22 @@ make clean
 
 Use `SCENARIO=<name>` with scenario-specific targets. Run `make help` to see the discovered scenario names and which one
 is the current default.
+
+## Dependency bump workflows
+
+The repository includes two scheduled GitHub Actions workflows that keep dependency pins current without doing a blind bulk
+update:
+
+- `.github/workflows/bump-github-actions.yml` checks upstream GitHub Action releases, resolves the newest tag SHA, and
+  opens a separate pull request for each action that has advanced.
+- `.github/workflows/bump-ansible-requirements.yml` does the same for GitHub-hosted role dependencies in
+  `requirements.yml`, comparing the current pinned SHA against the upstream release tag SHA and updating the pinned value.
+
+Both workflows run on a weekly schedule and can also be started manually with `workflow_dispatch`. They resolve the
+repository default branch before opening the PR so the update lands on the right base branch, and each PR title names the
+specific dependency or action being bumped. The PR description includes the upstream tag and the target commit link so a
+human reviewer can inspect exactly what has changed before merging.
+
+The workflows expect a `BUMP_PR_TOKEN` repository secret to exist so `peter-evans/create-pull-request` can open the PRs.
+This keeps updates reviewable, reduces the risk of merging an unexpected upstream change, and makes it easier to approve
+or reject a single dependency bump without coupling it to unrelated updates.
