@@ -22,25 +22,31 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    name: Lint
+  ansible-lint:
+    name: Ansible Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the codebase
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-          cache: 'pip'
-          cache-dependency-path: requirements-dev.txt
+      - uses: ./.github/actions/checkout-codebase
+      - uses: ./.github/actions/setup-python-3
 
       - name: Configure development environment
         run: make configure
 
-      - name: Run lint checks
-        run: make lint
+      - name: Run ansible lint checks
+        run: make ansible-lint
+
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/checkout-codebase
+      - uses: ./.github/actions/setup-python-3
+
+      - name: Configure development environment
+        run: make configure
+
+      - name: Run yaml lint checks
+        run: make yaml-lint
 
   molecule:
     name: Molecule - ${{ matrix.label }}
