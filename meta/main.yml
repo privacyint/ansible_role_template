@@ -7,7 +7,7 @@ galaxy_info:
   role_name: ansible_role_
   namespace: privacyint
 
-  min_ansible_version: "2.1"
+  min_ansible_version: "2.21"
   platforms:
     - name: Alpine
       versions:
