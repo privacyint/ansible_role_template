@@ -19,9 +19,11 @@ A clear and concise description of the bug.
 ## Steps to Reproduce
 
 1. Configure the role with variables:
+
    ```yaml
    # Paste relevant variable configuration
    ```
+
 2. Run the playbook: `ansible-playbook ...`
 3. Observe the error
 
@@ -33,7 +35,7 @@ What you expected to happen.
 
 What actually happened. Include error messages or logs:
 
-```
+```text
 # Paste error output here
 ```
 

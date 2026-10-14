@@ -1,6 +1,6 @@
-ansible-core>=2.19,<3.0
-ansible-lint>=6.22.0
-yamllint>=1.33.0
-molecule>=6.0
-molecule-plugins[docker]>=24.0
-docker>=6.0
+ansible-core>=2.21.5,<3.0  # Stick to Ansible 2.X to prevent future surprises
+ansible-lint>=26.10.0
+yamllint>=1.38.0
+molecule>=26.9.0
+molecule-plugins[docker]>=26.9.0
+docker>=7.2.0

@@ -1,0 +1,196 @@
+---
+name: Bump pinned GitHub Actions
+description: Refresh pinned GitHub Action SHAs and open one PR per action bump.
+
+on:
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bump-pinned-github-actions
+  cancel-in-progress: true
+
+jobs:
+  detect-updates:
+    name: Detect upstream action bumps
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.detect.outputs.has_changes }}
+      changes_json: ${{ steps.detect.outputs.changes_json }}
+      base_branch: ${{ steps.repo.outputs.base_branch }}
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Resolve default branch
+        id: repo
+        shell: bash
+        run: |
+          base_branch="$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' | head -n 1)"
+          if [ -z "$base_branch" ]; then
+            base_branch="main"
+          fi
+          echo "base_branch=$base_branch" >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed action pins
+        id: detect
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+          from urllib import request
+
+          repos = [
+              'actions/checkout',
+              'actions/setup-node',
+              'actions/setup-python',
+              'docker/setup-buildx-action',
+              'softprops/action-gh-release',
+              'peter-evans/create-pull-request',
+          ]
+
+          def fetch_latest_tag(repo: str):
+              token = os.environ.get('GITHUB_TOKEN')
+              headers = {
+                  'Accept': 'application/vnd.github+json',
+                  'User-Agent': 'repo-bump-action-pins',
+              }
+              if token:
+                  headers['Authorization'] = f'Bearer {token}'
+
+              failures = []
+              for url in [
+                  f'https://api.github.com/repos/{repo}/releases/latest',
+                  f'https://api.github.com/repos/{repo}/tags?per_page=1',
+              ]:
+                  req = request.Request(url, headers=headers)
+                  try:
+                      with request.urlopen(req, timeout=30) as resp:
+                          payload = json.load(resp)
+                  except Exception as exc:
+                      failures.append(f'{url}: {exc}')
+                      continue
+                  if isinstance(payload, list):
+                      if payload:
+                          return payload[0].get('name')
+                  else:
+                      tag = payload.get('tag_name')
+                      if tag:
+                          return tag
+
+              if failures:
+                  raise RuntimeError(f'Failed to resolve latest tag for {repo} from both GitHub API endpoints: {failures}')
+              return None
+
+          def resolve_tag_sha(repo: str, tag: str):
+              remote = f'https://github.com/{repo}.git'
+              cmd = ['git', 'ls-remote', '--tags', remote, f'refs/tags/{tag}']
+              try:
+                  out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True, timeout=30)
+              except subprocess.CalledProcessError:
+                  return None
+              for line in reversed(out.splitlines()):
+                  line = line.strip()
+                  if not line:
+                      continue
+                  if line.endswith(f'refs/tags/{tag}^{{}}'):
+                      return line.split()[0]
+              for line in out.splitlines():
+                  line = line.strip()
+                  if not line:
+                      continue
+                  if line.endswith(f'refs/tags/{tag}'):
+                      return line.split()[0]
+              return None
+
+          changes = []
+          for repo in repos:
+              tag = fetch_latest_tag(repo)
+              if not tag:
+                  continue
+              sha = resolve_tag_sha(repo, tag)
+              if not sha:
+                  continue
+              workflow_files = list(Path('.github/workflows').glob('*.yml'))
+              current_sha = None
+              for workflow_file in workflow_files:
+                  text = workflow_file.read_text(encoding='utf-8')
+                  match = re.search(rf'uses:\s*{re.escape(repo)}@([0-9a-f]{{40}})', text)
+                  if match:
+                      current_sha = match.group(1)
+                      break
+              if current_sha and current_sha != sha:
+                  changes.append({'name': repo, 'tag': tag, 'sha': sha})
+
+          payload = json.dumps(changes, separators=(',', ':'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f'has_changes={"true" if changes else "false"}\n')
+              fh.write(f'changes_json={payload}\n')
+          PY
+
+  update-prs:
+    name: Create PR for ${{ matrix.item.name }}
+    needs: detect-updates
+    if: needs.detect-updates.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        item: ${{ fromJSON(needs.detect-updates.outputs.changes_json) }}
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Update ${{ matrix.item.name }} to ${{ matrix.item.tag }}
+        shell: bash
+        env:
+          ITEM_NAME: ${{ matrix.item.name }}
+          ITEM_SHA: ${{ matrix.item.sha }}
+          ITEM_TAG: ${{ matrix.item.tag }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          repo = os.environ['ITEM_NAME']
+          sha = os.environ['ITEM_SHA']
+          tag = os.environ['ITEM_TAG']
+          workflow_dir = Path('.github/workflows')
+          for workflow_file in sorted(workflow_dir.glob('*.yml')):
+              text = workflow_file.read_text(encoding='utf-8')
+              before = text
+              text, count = re.subn(rf'(uses:\s*{re.escape(repo)}@)([0-9a-f]{{40}})(?:\s*#.*)?$', rf'\g<1>{sha}  # {tag}', text, flags=re.MULTILINE)
+              if count:
+                  workflow_file.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Propose workflow update
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          token: ${{ secrets.BUMP_PR_TOKEN }}
+          base: ${{ needs.detect-updates.outputs.base_branch }}
+          branch: chore/bump-${{ matrix.item.name }}
+          delete-branch: true
+          commit-message: 'chore: bump ${{ matrix.item.name }} to ${{ matrix.item.tag }}'
+          title: 'chore: bump ${{ matrix.item.name }} to ${{ matrix.item.tag }}'
+          body: |
+            ## Summary
+
+            This PR updates the pinned SHA for `${{ matrix.item.name }}` to the upstream release `${{ matrix.item.tag }}`.
+
+            - repo: `${{ matrix.item.name }}`
+            - release tag: [`${{ matrix.item.tag }}`](https://github.com/${{ matrix.item.name }}/releases/tag/${{ matrix.item.tag }})
+            - commit: [`${{ matrix.item.sha }}`](https://github.com/${{ matrix.item.name }}/commit/${{ matrix.item.sha }})
+
+            Review the action bump before merging to confirm it matches the release you want to consume.

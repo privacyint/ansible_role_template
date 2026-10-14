@@ -1,0 +1,49 @@
+---
+name: Documentation checks
+description: Perform linting checks on Markdown documentation files
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+    paths:
+      - '**/*.md'
+      - '.markdownlint*'
+      - '.github/workflows/docs.yml'
+      - 'Makefile'
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+    paths:
+      - '**/*.md'
+      - '.markdownlint*'
+      - '.github/workflows/docs.yml'
+      - 'Makefile'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  markdownlint:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Set up Node.js 20 environment
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: '20'
+
+      - name: Run markdown lint checks
+        run: make markdownlint

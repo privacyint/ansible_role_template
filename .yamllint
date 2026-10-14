@@ -2,7 +2,11 @@
 extends: default
 
 ignore: |
-  .*/
+  .git/
+  .ansible/
+  .venv/
+  .molecule/
+  .pytest_cache/
   molecule/*/roles/
 
 rules:

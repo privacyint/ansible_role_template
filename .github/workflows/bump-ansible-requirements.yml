@@ -1,0 +1,245 @@
+---
+name: Bump pinned Ansible requirements
+description: Refresh pinned role SHAs in requirements.yml and open one PR per dependency bump.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bump-ansible-requirements
+  cancel-in-progress: true
+
+jobs:
+  detect-updates:
+    name: Detect upstream requirement bumps
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.detect.outputs.has_changes }}
+      changes_json: ${{ steps.detect.outputs.changes_json }}
+      base_branch: ${{ steps.repo.outputs.base_branch }}
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Resolve default branch
+        id: repo
+        shell: bash
+        run: |
+          base_branch="$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' | head -n 1)"
+          if [ -z "$base_branch" ]; then
+            base_branch="main"
+          fi
+          echo "base_branch=$base_branch" >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed role pins
+        id: detect
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+          from urllib import request
+
+          requirements_path = Path('requirements.yml')
+          lines = requirements_path.read_text(encoding='utf-8').splitlines(keepends=True)
+
+          def github_repo_from_src(src: str):
+              s = src.strip().replace('git+', '').removesuffix('.git')
+              if 'github.com/' not in s:
+                  return None
+              match = re.search(r'github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/?#]+)', s)
+              if not match:
+                  return None
+              return match.group('owner'), match.group('repo')
+
+          def strip_inline_comment(value: str):
+              return re.sub(r'\s*#.*$', '', value).strip().strip("\"'")
+
+          def github_latest_tag(owner: str, repo: str):
+              token = os.environ.get('GITHUB_TOKEN')
+              headers = {
+                  'Accept': 'application/vnd.github+json',
+                  'User-Agent': 'repo-bump-ansible-requirements',
+              }
+              if token:
+                  headers['Authorization'] = f'Bearer {token}'
+
+              failures = []
+              for url in [
+                  f'https://api.github.com/repos/{owner}/{repo}/releases/latest',
+                  f'https://api.github.com/repos/{owner}/{repo}/tags?per_page=1',
+              ]:
+                  req = request.Request(url, headers=headers)
+                  try:
+                      with request.urlopen(req, timeout=30) as resp:
+                          payload = json.load(resp)
+                  except Exception as exc:
+                      failures.append(f'{url}: {exc}')
+                      continue
+                  if isinstance(payload, list):
+                      if payload:
+                          return payload[0].get('name')
+                  else:
+                      tag = payload.get('tag_name')
+                      if tag:
+                          return tag
+
+              if failures:
+                  raise RuntimeError(f'Failed to resolve latest tag for {owner}/{repo} from both GitHub API endpoints: {failures}')
+              return None
+
+          def git_tag_sha(repo_url: str, tag: str):
+              cmd = ['git', 'ls-remote', '--tags', repo_url, f'refs/tags/{tag}']
+              try:
+                  out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True, timeout=30)
+              except subprocess.CalledProcessError:
+                  return None
+              for line in reversed(out.splitlines()):
+                  line = line.strip()
+                  if not line:
+                      continue
+                  if line.endswith(f'refs/tags/{tag}^{{}}'):
+                      return line.split()[0]
+              for line in out.splitlines():
+                  line = line.strip()
+                  if not line:
+                      continue
+                  if line.endswith(f'refs/tags/{tag}'):
+                      return line.split()[0]
+              return None
+
+          changes = []
+          i = 0
+          while i < len(lines):
+              line = lines[i]
+              if re.match(r'^\s*-\s+name:\s+', line):
+                  j = i
+                  while j < len(lines):
+                      current = lines[j]
+                      if re.match(r'^\s*-\s+name:\s+', current) and j != i:
+                          break
+                      j += 1
+
+                  block = ''.join(lines[i:j])
+                  src_match = re.search(r'^\s*src:\s*(.+)$', block, re.MULTILINE)
+                  version_match = re.search(r'^\s*version:\s*(.+)$', block, re.MULTILINE)
+                  name_match = re.search(r'^\s*-\s+name:\s*(.+?)\s*$', block, re.MULTILINE)
+                  if src_match and version_match and name_match:
+                      src = src_match.group(1).strip().strip('"\'')
+                      repo = github_repo_from_src(src)
+                      if repo:
+                          owner, repo_name = repo
+                          name = name_match.group(1).strip().strip('"\'')
+                          tag = github_latest_tag(owner, repo_name)
+                          if tag:
+                              sha = git_tag_sha(f'https://github.com/{owner}/{repo_name}.git', tag)
+                              if sha:
+                                  current = strip_inline_comment(version_match.group(1))
+                                  if current != sha:
+                                      changes.append({
+                                          'name': name,
+                                          'repo': f'{owner}/{repo_name}',
+                                          'tag': tag,
+                                          'sha': sha,
+                                      })
+                  i = j
+                  continue
+              i += 1
+
+          payload = json.dumps(changes, separators=(',', ':'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f'has_changes={"true" if changes else "false"}\n')
+              fh.write(f'changes_json={payload}\n')
+          PY
+
+  update-prs:
+    name: Create PR for ${{ matrix.item.name }}
+    needs: detect-updates
+    if: needs.detect-updates.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        item: ${{ fromJSON(needs.detect-updates.outputs.changes_json) }}
+    steps:
+      - name: Check out the codebase
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Update ${{ matrix.item.name }} to ${{ matrix.item.tag }}
+        shell: bash
+        env:
+          ITEM_NAME: ${{ matrix.item.name }}
+          ITEM_SHA: ${{ matrix.item.sha }}
+          ITEM_TAG: ${{ matrix.item.tag }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          name = os.environ['ITEM_NAME']
+          sha = os.environ['ITEM_SHA']
+          tag = os.environ['ITEM_TAG']
+          path = Path('requirements.yml')
+          lines = path.read_text(encoding='utf-8').splitlines(keepends=True)
+          output = []
+          i = 0
+          changed = False
+
+          while i < len(lines):
+              line = lines[i]
+              if re.match(r'^\s*-\s+name:\s*(?:["\']?)' + re.escape(name) + r'(?:["\']?)\s*$', line):
+                  j = i
+                  while j < len(lines):
+                      current = lines[j]
+                      if re.match(r'^\s*-\s+name:\s+', current) and j != i:
+                          break
+                      j += 1
+
+                  updated = []
+                  for k in range(i, j):
+                      if re.match(r'^\s*version:\s*', lines[k]):
+                          updated.append(f'    version: "{sha}"  # "{tag}"\n')
+                          changed = True
+                      else:
+                          updated.append(lines[k])
+                  output.extend(updated)
+                  i = j
+                  continue
+
+              output.append(line)
+              i += 1
+
+          if changed:
+              path.write_text(''.join(output), encoding='utf-8')
+          PY
+
+      - name: Propose requirements update
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          token: ${{ secrets.BUMP_PR_TOKEN }}
+          base: ${{ needs.detect-updates.outputs.base_branch }}
+          branch: chore/bump-${{ matrix.item.name }}
+          delete-branch: true
+          commit-message: 'chore: bump ${{ matrix.item.name }} to ${{ matrix.item.tag }}'
+          title: 'chore: bump ${{ matrix.item.name }} to ${{ matrix.item.tag }}'
+          body: |
+            ## Summary
+
+            This PR updates the pinned SHA for `${{ matrix.item.name }}` to the upstream release `${{ matrix.item.tag }}`.
+
+            - upstream repository: `${{ matrix.item.repo }}`
+            - release tag: [`${{ matrix.item.tag }}`](https://github.com/${{ matrix.item.repo }}/releases/tag/${{ matrix.item.tag }})
+            - commit: [`${{ matrix.item.sha }}`](https://github.com/${{ matrix.item.repo }}/commit/${{ matrix.item.sha }})
+
+            Review the version bump before merging to confirm it matches the release you intend to consume.
