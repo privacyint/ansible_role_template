@@ -2,7 +2,9 @@
 
 ## Reporting a Vulnerability
 
-Privacy International takes security issues seriously. If you discover a security vulnerability in this Ansible role, please report it responsibly.
+Privacy International takes security issues seriously.
+
+If you discover a security vulnerability in this Ansible role, please report it responsibly.
 
 ### How to Report
 
@@ -39,7 +41,8 @@ When using this role:
 
 ### Supported Versions
 
-We provide security updates for the latest version of this role. If you are using an older version, please update to the latest release.
+We provide security updates for the latest version of this role. If you are using an older version, please update to the
+latest release.
 
 ## Additional Resources
 

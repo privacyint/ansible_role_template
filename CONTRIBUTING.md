@@ -33,11 +33,13 @@ Thank you for considering contributing to this Ansible role.
 Before submitting your changes:
 
 1. **Syntax check**:
+
    ```bash
    ansible-playbook --syntax-check tests/test.yml
    ```
 
 2. **Lint your code**:
+
    ```bash
    ansible-lint .
    ```
@@ -54,11 +56,13 @@ Before submitting your changes:
 ## Submitting Changes
 
 1. **Commit your changes** with clear, concise messages:
+
    ```bash
    git commit -m "Add support for feature X"
    ```
 
 2. **Push to your fork**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -86,14 +90,17 @@ Before submitting your changes:
 
 ## Code of Conduct
 
-Please note that this project adheres to a Code of Conduct (see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)). By participating, you are expected to uphold this code.
+Please note that this project adheres to a Code of Conduct (see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)). By participating,
+you are expected to uphold this code.
 
 ## Questions?
 
 If you have questions about contributing, feel free to:
+
 - Open a discussion issue
-- Contact Privacy International at tech@privacyinternational.org
+- Contact Privacy International at <tech@privacyinternational.org>
 
 ## Licence
 
-By contributing to this project, you agree that your contributions will be licenced under the [YOLO Public License (YPL) v0.12.34-hunter.2](LICENCE).
+By contributing to this project, you agree that your contributions will be licenced under the
+[YOLO Public License (YPL) v0.12.34-hunter.2](LICENCE).

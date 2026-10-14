@@ -8,6 +8,9 @@ dependency:
   options:
     role-file: molecule/shared/requirements.yml
     requirements-file: molecule/shared/requirements.yml
+  env:
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/collections
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/roles
 
 driver:
   name: docker
@@ -20,8 +23,9 @@ provisioner:
       stdout_callback: default
   # Paths must be env vars: ansible-compat exports them, and env overrides ansible.cfg.
   env:
-    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.venv/collections:${HOME}/.ansible/collections:/usr/share/ansible/collections
-    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.venv/collections:${HOME}/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/collections
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/.ansible/roles
+
   playbooks:
     prepare: prepare.yml
     converge: ../shared/converge.yml
@@ -35,10 +39,14 @@ platforms:
   - name: alpine
     image: alpine:3.24
     pre_build_image: true
-    privileged: false
-    command: /bin/sh -c "tail -f /dev/null"
+    command: /sbin/init
     tmpfs:
       - /run
+    # Uncomment the following lines to enable privileged mode and cgroup namespace support when the role is using nested containers
+    # privileged: true
+    # cgroupns_mode: host
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:rw
 
 verifier:
   name: ansible
@@ -46,7 +54,6 @@ verifier:
 scenario:
   name: alpine
   test_sequence:
-    - dependency
     - destroy
     - syntax
     - create
