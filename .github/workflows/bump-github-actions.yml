@@ -170,7 +170,7 @@ jobs:
           for workflow_file in sorted(workflow_dir.glob('*.yml')):
               text = workflow_file.read_text(encoding='utf-8')
               before = text
-              text, count = re.subn(rf'(uses:\s*{re.escape(repo)}@)([0-9a-f]{{40}})\s*(?:#\s*.*)?', rf'\g<1>{sha}  # {tag}', text)
+              text, count = re.subn(rf'(uses:\s*{re.escape(repo)}@)([0-9a-f]{{40}})(?:\s*#.*)?$', rf'\g<1>{sha}  # {tag}', text, flags=re.MULTILINE)
               if count:
                   workflow_file.write_text(text, encoding='utf-8')
           PY
