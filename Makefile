@@ -1,4 +1,4 @@
-.PHONY: help configure install requirements force-requirements ansible-lint yamllint markdownlint lint test test-scenario clean molecule-dependency molecule-create molecule-converge molecule-verify molecule-destroy
+.PHONY: help configure install requirements force-requirements ansible-lint yamllint markdownlint lint test test-scenario clean molecule-dependency molecule-create molecule-converge molecule-side-effect molecule-verify molecule-destroy
 SCENARIOS := $(patsubst molecule/%/molecule.yml,%,$(wildcard molecule/*/molecule.yml))
 SCENARIO ?= $(firstword $(SCENARIOS))
 PYTHON := python3.13
@@ -6,7 +6,7 @@ MARKDOWNLINT := 0.22.1
 VENV_PATH := $(CURDIR)/.venv
 ANSIBLE_PATH := $(CURDIR)/.ansible
 export PATH := $(VENV_PATH)/bin:$(PATH)
-export ANSIBLE_ROLES_PATH := $(ANSIBLE_PATH)/roles
+export ANSIBLE_ROLES_PATH := $(ANSIBLE_PATH)/roles:$(CURDIR)/molecule/shared/roles
 export ANSIBLE_COLLECTIONS_PATH := $(ANSIBLE_PATH)/collections
 
 help:
@@ -27,6 +27,7 @@ help:
 	@echo "  molecule-dependency   Resolve dependencies for all scenarios"
 	@echo "  molecule-create       Create Molecule test instances"
 	@echo "  molecule-converge     Apply role to test instances"
+	@echo "  molecule-side-effect  Run side effect tests"
 	@echo "  molecule-verify       Run verification tests"
 	@echo "  molecule-destroy      Destroy Molecule test instances"
 	@echo "  SCENARIO              Scenario for molecule-* targets. Defaults to $(SCENARIO). (available: $(SCENARIOS))"
@@ -89,6 +90,10 @@ molecule-dependency:
 molecule-converge:
 	@echo "Applying role in the $(SCENARIO) scenario..."
 	$(VENV_PATH)/bin/molecule converge --scenario-name "$(SCENARIO)"
+
+molecule-side-effect:
+	@echo "Running the side effect tests for the $(SCENARIO) Molecule scenario..."
+	$(VENV_PATH)/bin/molecule side-effect --scenario-name "$(SCENARIO)"
 
 molecule-verify:
 	@echo "Running $(SCENARIO) verification tests..."
