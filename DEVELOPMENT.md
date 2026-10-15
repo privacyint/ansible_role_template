@@ -99,12 +99,15 @@ scenario or to work through individual Molecule stages:
 make test-scenario SCENARIO=debian
 make molecule-create SCENARIO=alpine
 make molecule-converge SCENARIO=alpine
+make molecule-side-effect SCENARIO=alpine
 make molecule-verify SCENARIO=alpine
 make molecule-destroy SCENARIO=alpine
 ```
 
 The `molecule-*` targets operate on the selected `SCENARIO`; use `make molecule-dependency` to resolve dependencies for
-all scenarios before running Molecule steps.
+all scenarios before running Molecule steps. The full `make test` sequence runs the optional side-effect playbook after
+idempotence and before verification. Add `side_effect.yml` to a scenario directory (for example, `molecule/alpine/side_effect.yml`)
+for scenario-specific post-idempotence checks or changes; Molecule skips the step when that file is not present.
 
 The current shared verifier reports that the role was applied; it does not assert role-specific system state. Add meaningful
 behavioural checks to `molecule/shared/verify.yml` as you implement your role; it is uninteresting that files match what
@@ -173,6 +176,7 @@ make test-scenario SCENARIO=alpine
 make molecule-dependency
 make molecule-create SCENARIO=alpine
 make molecule-converge SCENARIO=alpine
+make molecule-side-effect SCENARIO=alpine
 make molecule-verify SCENARIO=alpine
 make molecule-destroy SCENARIO=alpine
 make clean

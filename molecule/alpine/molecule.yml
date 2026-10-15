@@ -29,6 +29,7 @@ provisioner:
   playbooks:
     prepare: prepare.yml
     converge: ../shared/converge.yml
+    side_effect: side_effect.yml
     verify: ../shared/verify.yml
   inventory:
     links:
@@ -60,6 +61,7 @@ scenario:
     - prepare
     - converge
     - idempotence
+    - side_effect
     - verify
     - cleanup
     - destroy
