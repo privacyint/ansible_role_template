@@ -6,7 +6,7 @@ MARKDOWNLINT := 0.22.1
 VENV_PATH := $(CURDIR)/.venv
 ANSIBLE_PATH := $(CURDIR)/.ansible
 export PATH := $(VENV_PATH)/bin:$(PATH)
-export ANSIBLE_ROLES_PATH := $(ANSIBLE_PATH)/roles
+export ANSIBLE_ROLES_PATH := $(ANSIBLE_PATH)/roles:$(CURDIR)/molecule/shared/roles
 export ANSIBLE_COLLECTIONS_PATH := $(ANSIBLE_PATH)/collections
 
 help:
